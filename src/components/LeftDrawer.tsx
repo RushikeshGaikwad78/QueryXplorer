@@ -1,17 +1,14 @@
-import React from 'react';
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Collapse,
-  Divider
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon
-} from '@mui/icons-material';
+import React, { memo } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Collapse from '@mui/material/Collapse';
+import Divider from '@mui/material/Divider';
+
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Database } from '../types';
 
 interface LeftDrawerProps {
@@ -22,13 +19,14 @@ interface LeftDrawerProps {
   toggleTable: (dbName: string, tableName: string) => void;
 }
 
-const LeftDrawer: React.FC<LeftDrawerProps> = ({
+// Use memo to prevent unnecessary re-renders
+const LeftDrawer = memo(({
   databases,
   expandedDB,
   expandedTables,
   toggleDatabase,
   toggleTable
-}) => {
+}: LeftDrawerProps) => {
   return (
     <Box sx={{ width: 250 }}>
       <Typography variant="h6" sx={{ p: 1, fontWeight: 'bold' }}>
@@ -38,7 +36,11 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
       <List>
         {Object.keys(databases).map((dbName) => (
           <Box key={dbName}>
-            <ListItem component="div" onClick={() => toggleDatabase(dbName)}>
+            <ListItem 
+            component="div" 
+              onClick={() => toggleDatabase(dbName)}
+              sx={{ cursor: 'pointer' }}
+            >
               <ListItemText
                 primary={dbName}
                 primaryTypographyProps={{
@@ -53,7 +55,11 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
               <List component="div" disablePadding sx={{ pl: 1 }}>
                 {Object.keys(databases[dbName]).map((tableName) => (
                   <Box key={tableName}>
-                    <ListItem component="div" onClick={() => toggleTable(dbName, tableName)} sx={{ pl: 2 }}>
+                    <ListItem 
+                      component="div" 
+                      onClick={() => toggleTable(dbName, tableName)} 
+                      sx={{ pl: 2, cursor: 'pointer' }}
+                    >
                       <ListItemText
                         primary={tableName}
                         primaryTypographyProps={{
@@ -84,6 +90,8 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
       </List>
     </Box>
   );
-};
+});
 
-export default LeftDrawer; 
+LeftDrawer.displayName = 'LeftDrawer';
+
+export default LeftDrawer;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -20,7 +20,10 @@ interface QueryResultDialogProps {
   queryResult: { headers: string[]; rows: string[][] } | null;
 }
 
-const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, queryResult }) => {
+// Memoize the component to prevent unnecessary re-renders
+const QueryResultDialog = memo(({ open, onClose, queryResult }: QueryResultDialogProps) => {
+  if (!open) return null;
+  
   return (
     <Dialog
       open={open}
@@ -33,7 +36,7 @@ const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, qu
       <DialogContent>
         {queryResult ? (
           <TableContainer component={Paper} sx={{ maxHeight: "60vh", overflow: "auto" }}>
-            <Table>
+            <Table stickyHeader aria-label="query results">
               <TableHead>
                 <TableRow>
                   {queryResult.headers.map((header, index) => (
@@ -65,6 +68,8 @@ const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, qu
       </DialogActions>
     </Dialog>
   );
-};
+});
 
-export default QueryResultDialog; 
+QueryResultDialog.displayName = 'QueryResultDialog';
+
+export default QueryResultDialog;

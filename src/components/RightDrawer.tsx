@@ -1,13 +1,16 @@
-import React, { Suspense } from 'react';
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Divider
-} from '@mui/material';
+import React, { memo, lazy, Suspense } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+
+import Divider from '@mui/material/Divider';
+
 import { QueryHistoryItem } from '../types';
+
+// Lazy load dialog component
+const QueryResultDialog = lazy(() => import('./QueryResultDialog'));
 
 interface RightDrawerProps {
   queryHistory: QueryHistoryItem[];
@@ -17,16 +20,13 @@ interface RightDrawerProps {
   selectedQueryResult: { headers: string[]; rows: string[][] } | null;
 }
 
-const RightDrawer: React.FC<RightDrawerProps> = ({
+const RightDrawer = memo(({
   queryHistory,
   onQueryClick,
   openDialog,
   onCloseDialog,
   selectedQueryResult
-}) => {
-  // Lazy load the dialog component
-  const QueryResultDialog = React.lazy(() => import('./QueryResultDialog'));
-
+}: RightDrawerProps) => {
   return (
     <Box sx={{ width: 270 }}>
       <Typography variant="h6" sx={{ p: 1 }}>Query History</Typography>
@@ -55,16 +55,7 @@ const RightDrawer: React.FC<RightDrawerProps> = ({
             >
               <ListItemText 
                 primary={item.query}
-                secondary={
-                  <>
-                    <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-                      Database: MyDatabase
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-                      {item.timestamp}
-                    </Typography>
-                  </>
-                }
+                secondary={item.timestamp}
                 primaryTypographyProps={{ 
                   noWrap: true, 
                   sx: { fontSize: '0.875rem', fontFamily: 'monospace' } 
@@ -75,17 +66,19 @@ const RightDrawer: React.FC<RightDrawerProps> = ({
         )}
       </List>
 
-      <Suspense fallback={<div>Loading...</div>}>
-        {openDialog && (
+      {openDialog && (
+        <Suspense fallback={<div>Loading...</div>}>
           <QueryResultDialog
             open={openDialog}
             onClose={onCloseDialog}
             queryResult={selectedQueryResult}
           />
-        )}
-      </Suspense>
+        </Suspense>
+      )}
     </Box>
   );
-};
+});
 
-export default RightDrawer; 
+RightDrawer.displayName = 'RightDrawer';
+
+export default RightDrawer;

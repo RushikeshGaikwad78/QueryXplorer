@@ -1,5 +1,5 @@
-import React from 'react';
-import { TextField } from '@mui/material';
+import React, { memo } from 'react';
+import TextField from '@mui/material/TextField';
 
 interface QueryEditorProps {
   value: string;
@@ -7,16 +7,22 @@ interface QueryEditorProps {
   disabled?: boolean;
 }
 
-const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange, disabled = false }) => {
+const QueryEditor = memo(({ value, onChange, disabled = false }: QueryEditorProps) => {
+  // Use direct handler to avoid closure creation on each render
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
   return (
     <TextField
       fullWidth
       multiline
       rows={4}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={handleChange}
       placeholder="Enter SQL query..."
       disabled={disabled}
+      variant="outlined"
       sx={{ 
         mb: 2,
         '& .MuiInputBase-root': {
@@ -27,6 +33,8 @@ const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange, disabled = f
       }}
     />
   );
-};
+});
 
-export default QueryEditor; 
+QueryEditor.displayName = 'QueryEditor';
+
+export default QueryEditor;

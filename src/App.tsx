@@ -9,6 +9,7 @@ import {
 import { QueryState} from './types'
 import { mockDatabases } from './data/mockdata'
 import LeftDrawer from './components/LeftDrawer'
+import RightDrawer from './components/RightDrawer'
 
 function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -24,7 +25,9 @@ function App() {
     theme: prefersDarkMode ? 'dark' : 'light',
     queryHistory: []
   })
-  
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedQueryResult, setSelectedQueryResult] = useState<{ headers: string[]; rows: string[][] } | null>(null);
+
   const toggleDatabase = useCallback((dbName: string) => {
     setState(prev => ({
       ...prev,
@@ -62,6 +65,38 @@ function App() {
       />
     </Suspense>
   ), [state.databases, state.expandedDB, state.expandedTables, toggleDatabase, toggleTable]);
+
+  const handleQueryClick = (query: string) => {
+    // Dummy query result for testing
+    const dummyResult = {
+      headers: ["Column1", "Column2", "Column3"],
+      rows: [
+        ["Row1-Col1", "Row1-Col2", "Row1-Col3"],
+        ["Row2-Col1", "Row2-Col2", "Row2-Col3"],
+      ],
+    };
+  
+    setSelectedQueryResult(dummyResult);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedQueryResult(null);
+  };
+
+  const rightDrawerContent = useMemo(() => (
+    <Suspense fallback={<Box sx={{ p: 2 }}>Loading...</Box>}>
+      <RightDrawer
+        queryHistory={state.queryHistory}
+        onQueryClick={handleQueryClick}
+        openDialog={openDialog}
+        onCloseDialog={handleCloseDialog}
+        selectedQueryResult={selectedQueryResult}
+      />
+    </Suspense>
+  ), [state.queryHistory, handleQueryClick, openDialog, selectedQueryResult]);
+
 
   return (
     <>
@@ -129,7 +164,44 @@ function App() {
         {/* main content */}
 
         {/* Right Drawer */}
-
+        <Drawer
+          variant="temporary"
+          anchor="right"
+          open={mobileRightOpen}
+          onClose={() => setMobileRightOpen(false)}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              width: drawerWidth.right,
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          {rightDrawerContent}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          anchor="right"
+          sx={{
+            width: drawerWidth.right,
+            flexShrink: 0,
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': {
+              width: drawerWidth.right,
+              boxSizing: 'border-box',
+              top: '64px',
+              height: 'calc(100% - 64px)',
+              position: 'fixed',
+              right: 0,
+              border: 'none',
+              borderLeft: '1px solid',
+              borderColor: 'divider'
+            },
+          }}
+        >
+          {rightDrawerContent}
+        </Drawer>
 
     </>
   )

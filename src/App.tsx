@@ -1,15 +1,19 @@
 import './App.css'
 import { useState, Suspense, useMemo , useCallback } from 'react'  
-import { AppBar,Toolbar,IconButton,Typography,Drawer,Box,useMediaQuery  } from '@mui/material'
+import { AppBar,Toolbar,IconButton,Typography,Drawer,Box,useMediaQuery, Paper, Container, Button } from '@mui/material'
 import {
   Menu as MenuIcon,
-  History as HistoryIcon     
+  History as HistoryIcon,
+  ContentCopy as ContentCopyIcon,
+  PlayArrow as PlayArrowIcon
 } from '@mui/icons-material'
 
-import { QueryState} from './types'
+import { QueryHistoryItem, QueryState} from './types'
 import { mockDatabases } from './data/mockdata'
 import LeftDrawer from './components/LeftDrawer'
 import RightDrawer from './components/RightDrawer'
+import QueryResultTable from './components/QueryResultTable'
+import QueryEditor from './components/QueryEditor'
 
 function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -27,6 +31,11 @@ function App() {
   })
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedQueryResult, setSelectedQueryResult] = useState<{ headers: string[]; rows: string[][] } | null>(null);
+  const [filterColumn, setFilterColumn] = useState("")
+  const [filterOperator, setFilterOperator] = useState("=")
+  const [filterValue, setFilterValue] = useState("")
+  const [sortColumn, setSortColumn] = useState("")
+  const [sortOrder, setSortOrder] = useState("asc")
 
   const toggleDatabase = useCallback((dbName: string) => {
     setState(prev => ({
@@ -84,6 +93,131 @@ function App() {
     setOpenDialog(false);
     setSelectedQueryResult(null);
   };
+
+  const handleSort = useCallback((column: string) => {
+    if (!state.tableData) return;
+    
+    const newSortOrder = sortColumn === column && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortColumn(column);
+    setSortOrder(newSortOrder);
+  
+    const columnIndex = state.tableData.headers.indexOf(column);
+    const sortedRows = [...state.tableData.rows].sort((a, b) => {
+      const aValue = a[columnIndex];
+      const bValue = b[columnIndex];
+  
+      // Handle numeric values
+      if (!isNaN(aValue) && !isNaN(bValue)) {
+        return newSortOrder === 'asc' 
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
+      }
+  
+      // Handle string values
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+      return newSortOrder === 'asc'
+        ? aStr.localeCompare(bStr)
+        : bStr.localeCompare(aStr);
+    });
+  
+    setState(prev => ({
+      ...prev,
+      tableData: {
+        ...prev.tableData!,
+        headers: prev.tableData!.headers,
+        rows: sortedRows
+      }
+    }));
+  }, [sortColumn, sortOrder, state.tableData]);
+  
+  const handleFilter = useCallback(() => {
+    if (!filterColumn || !filterOperator || !filterValue || !state.tableData) return;
+    
+    const filteredRows = state.tableData.rows.filter(row => {
+      const columnIndex = state.tableData!.headers.indexOf(filterColumn);
+      const cellValue = row[columnIndex];
+      
+      switch (filterOperator) {
+        case '=':
+          return cellValue === filterValue;
+        case '!=':
+          return cellValue !== filterValue;
+        case '>':
+          return cellValue > filterValue;
+        case '<':
+          return cellValue < filterValue;
+        case '>=':
+          return cellValue >= filterValue;
+        case '<=':
+          return cellValue <= filterValue;
+        default:
+          return true;
+      }
+    });
+    
+    setState(prev => ({
+      ...prev,
+      tableData: {
+        ...prev.tableData!,
+        headers: prev.tableData!.headers,
+        rows: filteredRows
+      }
+    }));
+  }, [filterColumn, filterOperator, filterValue, state.tableData]);
+  
+
+  const handlePasteQuery = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      setState(prev => ({ ...prev, query: text }))
+    } catch (err) {
+      console.error('Failed to read clipboard:', err)
+    }
+  }, []);
+
+  const handleRunQuery = useCallback(() => {
+    if (!state.query.trim()) return;
+
+    const timestamp = new Date().toLocaleString()
+    const newHistoryItem: QueryHistoryItem = {
+      id: Date.now().toString(),
+      query: state.query,
+      timestamp
+    }
+
+    let result
+    if (state.query.toLowerCase().includes("select * from users")) {
+      result = {
+        headers: ["ID", "Name", "Age"],
+        rows: [
+          [1, "Alice", 25],
+          [2, "Bob", 30],
+          [3, "Charlie", 22],
+        ],
+      }
+    } else if (state.query.toLowerCase().includes("select * from orders")) {
+      result = {
+        headers: ["Order ID", "User", "Total"],
+        rows: [
+          [101, "Alice", "$120"],
+          [102, "Bob", "$250"],
+        ],
+      }
+    } else {
+      result = {
+        headers: ["Message"],
+        rows: [["No matching data found"]],
+      }
+    }
+
+    setState(prev => ({
+      ...prev,
+      tableData: result,
+      queryHistory: [newHistoryItem, ...prev.queryHistory]
+    }))
+  }, [state.query]);
+
 
   const rightDrawerContent = useMemo(() => (
     <Suspense fallback={<Box sx={{ p: 2 }}>Loading...</Box>}>
@@ -162,7 +296,99 @@ function App() {
         </Drawer>
         
         {/* main content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            // width: { md: `calc(100% - ${drawerWidth.left + drawerWidth.right}px)` },
+            marginLeft: '-40px',
+            marginTop: '64px',
+            minHeight: 'calc(100vh - 64px)',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+          }}
+        >
+          <Container 
+            maxWidth={false}
+            disableGutters
+            sx={{ 
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              px: { xs: 1, sm: 2, md: 3 },
+            }}
+          >
+            <Paper sx={{ 
+              p: { xs: 2, sm: 3 }, 
+              mb: 3, 
+              backgroundColor: 'background.paper',
+              minHeight: '200px',
+              width: '100%'
+            }}>
+              <Typography variant="h6" gutterBottom>
+                SQL Query Editor
+              </Typography>
+              <QueryEditor
+                value={state.query}
+                onChange={(value) => setState(prev => ({ ...prev, query: value }))}
+                disabled={false}
+              />
+              <Box sx={{ 
+                display: 'flex', 
+                gap: { xs: 1, sm: 2 },
+                flexDirection: { xs: 'column', sm: 'row' },
+                mt: 2
+              }}>
+                <Button
+                  fullWidth={false}
+                  variant="contained"
+                  startIcon={<ContentCopyIcon />}
+                  onClick={handlePasteQuery}
+                  sx={{ flex: { sm: 1 } }}
+                >
+                  Paste Query
+                </Button>
+                <Button
+                  fullWidth={false}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PlayArrowIcon />}
+                  onClick={handleRunQuery}
+                  sx={{ flex: { sm: 1 } }}
+                >
+                  Run Query
+                </Button>
+              </Box>
+            </Paper>
 
+            {state.tableData && (
+              <Paper sx={{ p: { xs: 2, sm: 3 }, backgroundColor: 'background.paper' }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Suspense fallback={<Typography>Loading results...</Typography>}>
+                    <QueryResultTable
+                      headers={state.tableData.headers}
+                      rows={state.tableData.rows}
+                      onSort={handleSort}
+                      sortColumn={sortColumn}
+                      sortOrder={sortOrder}
+                      onFilter={handleFilter}
+                      filterColumn={filterColumn}
+                      filterOperator={filterOperator}
+                      filterValue={filterValue}
+                      onFilterColumnChange={setFilterColumn}
+                      onFilterOperatorChange={setFilterOperator}
+                      onFilterValueChange={setFilterValue}
+                    />
+                  </Suspense>
+                </Box>
+              </Paper>  
+            )}
+
+          </Container>
+        </Box>
         {/* Right Drawer */}
         <Drawer
           variant="temporary"

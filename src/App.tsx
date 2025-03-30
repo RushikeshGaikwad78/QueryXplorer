@@ -99,18 +99,27 @@ function App() {
     }))
   }, [])
 
-  const handleQueryClick = useCallback((query: string) => {
+  const handleQueryClick = useCallback(async (query: string) => {
     // Simplified dummy result for testing
-    const dummyResult = {
-      headers: ["Column1", "Column2", "Column3"],
-      rows: [
-        ["Row1-Col1", "Row1-Col2", "Row1-Col3"],
-        ["Row2-Col1", "Row2-Col2", "Row2-Col3"],
-      ],
+    try {
+      // Extract table name from query
+      const tableMatch = query.toLowerCase().match(/from\s+(\w+)/i);
+      if (!tableMatch) {
+        throw new Error('No table specified in query');
+      }
+
+      const tableName = tableMatch[1];
+      const result = await executeQuery(query);
+      setSelectedQueryResult(result);
+      setOpenDialog(true);
+    } catch (error) {
+      console.error('Error executing query:', error);
+      setSelectedQueryResult({
+        headers: ['Error'],
+        rows: [[error instanceof Error ? error.message : 'Failed to execute query']]
+      });
+      setOpenDialog(true);
     }
-  
-    setSelectedQueryResult(dummyResult)
-    setOpenDialog(true)
   }, [])
 
   const handleCloseDialog = useCallback(() => {
@@ -208,25 +217,37 @@ function App() {
       timestamp
     };
 
-    // Execute query using CSV utilities
     executeQuery(state.query)
       .then(result => {
-        setState(prev => ({
-          ...prev,
-          tableData: result,
-          queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
-        }));
+        setState(prev => {
+          // Filter out the duplicate query before adding the new one
+          const filteredHistory = prev.queryHistory.filter(
+            (item) => item.query !== state.query
+          );
+
+          return {
+            ...prev,
+            tableData: result,
+            queryHistory: [newHistoryItem, ...filteredHistory.slice(0, 9)]
+          };
+        });
       })
       .catch(error => {
         console.error('Error executing query:', error);
-        setState(prev => ({
-          ...prev,
-          tableData: {
-            headers: ['Error'],
-            rows: [[error.message]]
-          },
-          queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
-        }));
+        setState(prev => {
+          const filteredHistory = prev.queryHistory.filter(
+            (item) => item.query !== state.query
+          );
+
+          return {
+            ...prev,
+            tableData: {
+              headers: ['Error'],
+              rows: [[error.message]]
+            },
+            queryHistory: [newHistoryItem, ...filteredHistory.slice(0, 9)]
+          };
+        });
       });
   }, [state.query]);
 

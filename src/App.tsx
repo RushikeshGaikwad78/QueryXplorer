@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, lazy, Suspense } from 'react'
-// import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
@@ -53,17 +53,17 @@ function App() {
   const [sortOrder, setSortOrder] = useState("asc")
 
   // Memoize theme to prevent unnecessary recalculations
-  // const theme = useMemo(() => createTheme({
-  //   palette: {
-  //     mode: state.theme,
-  //     primary: {
-  //       main: '#646cff',
-  //     },
-  //     secondary: {
-  //       main: '#535bf2',
-  //     },
-  //   },
-  // }), [state.theme])
+  const theme = useMemo(() => createTheme({
+    palette: {
+      mode: state.theme,
+      primary: {
+        main: '#646cff',
+      },
+      secondary: {
+        main: '#535bf2',
+      },
+    },
+  }), [state.theme])
 
   const toggleDatabase = useCallback((dbName: string) => {
     setState(prev => ({
@@ -297,9 +297,9 @@ function App() {
   ), [mobileLeftOpen, mobileRightOpen, toggleTheme])
 
   return (
-    // <ThemeProvider theme={theme}>
-    //   <CssBaseline />
-    <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+
       {appBar}
       
       {/* Left Drawer - Mobile */}
@@ -410,7 +410,7 @@ function App() {
               </Suspense>
             )}
           </Box>
-    </Box>
+      </Box>
 
 
       {/* Right Drawer - Mobile */}
@@ -454,8 +454,8 @@ function App() {
       >
         {rightDrawerContent}
       </Drawer>
-    {/* </ThemeProvider> */}
-    </>
+    </ThemeProvider>
+    
   )
 }
 

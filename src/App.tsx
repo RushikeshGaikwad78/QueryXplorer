@@ -18,6 +18,7 @@ import PredefinedQueries from './components/PredefinedQueries'
 
 import { QueryHistoryItem, QueryState, Query } from './types'
 import { mockDatabases } from './data/mockdata'
+import { executeQuery } from './utils/csvUtils'
 
 // Lazy load components with explicit loading boundaries
 const LeftDrawer = lazy(() => import('./components/LeftDrawer'))
@@ -38,7 +39,10 @@ function App() {
   const [mobileRightOpen, setMobileRightOpen] = useState(false)
   const [state, setState] = useState<QueryState>({
     query: '',
-    tableData: null,
+    tableData: {
+      headers: [],
+      rows: []
+    },
     activeTable: null,
     expandedDB: {},
     expandedTables: {},
@@ -204,58 +208,26 @@ function App() {
       timestamp
     };
 
-    // Extract table name from query (simple implementation)
-    const tableMatch = state.query.toLowerCase().match(/from\s+(\w+)/i);
-    const tableName = tableMatch ? tableMatch[1] : null;
-
-    if (tableName) {
-      // Load CSV file
-      fetch(`/${tableName}.csv`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to load ${tableName}.csv`);
-          }
-          return response.text();
-        })
-        .then(csvText => {
-          // Parse CSV
-          const lines = csvText.split('\n');
-          const headers = lines[0].split(',').map(h => h.trim());
-          const rows = lines.slice(1)
-            .filter(line => line.trim())
-            .map(line => line.split(',').map(cell => cell.trim()));
-
-          setState(prev => ({
-            ...prev,
-            tableData: {
-              headers,
-              rows
-            },
-            queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
-          }));
-        })
-        .catch(error => {
-          console.error('Error loading CSV:', error);
-          setState(prev => ({
-            ...prev,
-            tableData: {
-              headers: ['Error'],
-              rows: [['Failed to load data']]
-            },
-            queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
-          }));
-        });
-    } else {
-      // Handle queries without a table name
-      setState(prev => ({
-        ...prev,
-        tableData: {
-          headers: ['Message'],
-          rows: [['Please specify a table name in your query (e.g., SELECT * FROM customers)']]
-        },
-        queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
-      }));
-    }
+    // Execute query using CSV utilities
+    executeQuery(state.query)
+      .then(result => {
+        setState(prev => ({
+          ...prev,
+          tableData: result,
+          queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
+        }));
+      })
+      .catch(error => {
+        console.error('Error executing query:', error);
+        setState(prev => ({
+          ...prev,
+          tableData: {
+            headers: ['Error'],
+            rows: [[error.message]]
+          },
+          queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
+        }));
+      });
   }, [state.query]);
 
   const handleQueryChange = useCallback((value: string) => {
@@ -388,7 +360,7 @@ function App() {
           sx={{
             flexGrow: 1,
             p: 3,
-            width: { md: `calc(100% - ${DRAWER_WIDTH.left + DRAWER_WIDTH.right + 140}px)` },
+            width: { md: `calc(100% - ${DRAWER_WIDTH.left + DRAWER_WIDTH.right}px)` },
             marginLeft: { md: `${DRAWER_WIDTH.left}px` },
             marginRight: { md: `${DRAWER_WIDTH.right}px` },
             marginTop: '64px',

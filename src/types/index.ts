@@ -33,11 +33,16 @@ export interface Column {
   
   export interface QueryState {
     query: string;
-    tableData: QueryResult | null;
+    tableData: TableData;
     activeTable: string | null;
     expandedDB: { [key: string]: boolean };
     expandedTables: { [key: string]: boolean };
     databases: Database;
     theme: 'light' | 'dark';
     queryHistory: QueryHistoryItem[];
+  }
+  
+  export interface TableData {
+    headers: string[];
+    rows: string[][];
   } 

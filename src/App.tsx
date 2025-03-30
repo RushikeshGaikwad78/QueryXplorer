@@ -326,18 +326,25 @@ function App() {
           sx={{
             flexGrow: 1,
             p: 3,
-            width: '100%',
+            width: { md: `calc(100% - ${drawerWidth.left + drawerWidth.right}px)` },
+            marginLeft: { md: `${drawerWidth.left - 10 }px` },
+            marginRight: { md: `${drawerWidth.right - 8}px` },
             marginTop: '64px',
-            
+            minHeight: 'calc(100vh - 64px)',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
           }}
         >
           <Container 
+            maxWidth={false}
+            disableGutters
             sx={{ 
               height: '100%',
-
-              mx: 'auto',
-              px: { xs: 1, sm: 2, md: 4 },
               width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              px: { xs: 1, sm: 2, md: 3 },
             }}
           >
             <Paper sx={{ 
@@ -345,7 +352,7 @@ function App() {
               mb: 3, 
               backgroundColor: 'background.paper',
               minHeight: '200px',
-              width: '100%',
+              width: '100%'
             }}>
               <Typography variant="h6" gutterBottom>
                 SQL Query Editor
@@ -381,7 +388,6 @@ function App() {
                   Run Query
                 </Button>
               </Box>
-              
             </Paper>
 
             {state.tableData && (

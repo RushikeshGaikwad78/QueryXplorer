@@ -13,8 +13,10 @@ import HistoryIcon from '@mui/icons-material/History'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 
+import { predefinedQueries } from './data/preDefinedQueries'
+import PredefinedQueries from './components/PredefinedQueries'
 
-import { QueryHistoryItem, QueryState } from './types'
+import { QueryHistoryItem, QueryState, Query } from './types'
 import { mockDatabases } from './data/mockdata'
 
 // Lazy load components with explicit loading boundaries
@@ -193,51 +195,77 @@ function App() {
   }, [])
 
   const handleRunQuery = useCallback(() => {
-    if (!state.query.trim()) return
+    if (!state.query.trim()) return;
 
-    const timestamp = new Date().toLocaleString()
+    const timestamp = new Date().toLocaleString();
     const newHistoryItem: QueryHistoryItem = {
       id: Date.now().toString(),
       query: state.query,
       timestamp
-    }
+    };
 
-    // Simplified results logic
-    let result
-    if (state.query.toLowerCase().includes("select * from users")) {
-      result = {
-        headers: ["ID", "Name", "Age"],
-        rows: [
-          [1, "Alice", 25],
-          [2, "Bob", 30],
-          [3, "Charlie", 22],
-        ],
-      }
-    } else if (state.query.toLowerCase().includes("select * from orders")) {
-      result = {
-        headers: ["Order ID", "User", "Total"],
-        rows: [
-          [101, "Alice", "$120"],
-          [102, "Bob", "$250"],
-        ],
-      }
+    // Extract table name from query (simple implementation)
+    const tableMatch = state.query.toLowerCase().match(/from\s+(\w+)/i);
+    const tableName = tableMatch ? tableMatch[1] : null;
+
+    if (tableName) {
+      // Load CSV file
+      fetch(`/${tableName}.csv`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load ${tableName}.csv`);
+          }
+          return response.text();
+        })
+        .then(csvText => {
+          // Parse CSV
+          const lines = csvText.split('\n');
+          const headers = lines[0].split(',').map(h => h.trim());
+          const rows = lines.slice(1)
+            .filter(line => line.trim())
+            .map(line => line.split(',').map(cell => cell.trim()));
+
+          setState(prev => ({
+            ...prev,
+            tableData: {
+              headers,
+              rows
+            },
+            queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
+          }));
+        })
+        .catch(error => {
+          console.error('Error loading CSV:', error);
+          setState(prev => ({
+            ...prev,
+            tableData: {
+              headers: ['Error'],
+              rows: [['Failed to load data']]
+            },
+            queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
+          }));
+        });
     } else {
-      result = {
-        headers: ["Message"],
-        rows: [["No matching data found"]],
-      }
+      // Handle queries without a table name
+      setState(prev => ({
+        ...prev,
+        tableData: {
+          headers: ['Message'],
+          rows: [['Please specify a table name in your query (e.g., SELECT * FROM customers)']]
+        },
+        queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)]
+      }));
     }
-
-    setState(prev => ({
-      ...prev,
-      tableData: result,
-      queryHistory: [newHistoryItem, ...prev.queryHistory.slice(0, 9)] // Limit history to 10 items
-    }))
-  }, [state.query])
+  }, [state.query]);
 
   const handleQueryChange = useCallback((value: string) => {
     setState(prev => ({ ...prev, query: value }))
   }, [])
+
+  const handlePredefinedQuerySelect = useCallback((query: Query) => {
+    setState(prev => ({ ...prev, query: query.sql }))
+    handleRunQuery()
+  }, [handleRunQuery])
 
   // Memoize left drawer content to prevent unnecessary rerenders
   const leftDrawerContent = useMemo(() => (
@@ -316,7 +344,13 @@ function App() {
           },
         }}
       >
-        {leftDrawerContent}
+        <Box sx={{ pt: 2 }}>
+          <PredefinedQueries 
+            queries={predefinedQueries} 
+            onQuerySelect={handlePredefinedQuerySelect}
+          />
+          {leftDrawerContent}
+        </Box>
       </Drawer>
 
       {/* Left Drawer - Desktop */}
@@ -339,7 +373,13 @@ function App() {
           },
         }}
       >
-        {leftDrawerContent}
+        <Box sx={{ pt: 2 }}>
+          <PredefinedQueries 
+            queries={predefinedQueries} 
+            onQuerySelect={handlePredefinedQuerySelect}
+          />
+          {leftDrawerContent}
+        </Box>
       </Drawer>
       
       {/* Main content */}

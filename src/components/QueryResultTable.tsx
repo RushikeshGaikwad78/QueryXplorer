@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -7,15 +7,21 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-
+import TablePagination from '@mui/material/TablePagination';
+import TableContainer from '@mui/material/TableContainer';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 
 // Component props with explicit types
 interface QueryResultTableProps {
   headers: string[];
   rows: any[][];
-  onSort: (column: string) => void;
-  sortColumn: string;
-  sortOrder: string;
+  onSort?: (column: string) => void;
+  sortColumn?: string;
+  sortOrder?: string;
   onFilter: () => void;
   filterColumn: string;
   filterOperator: string;
@@ -33,31 +39,30 @@ const TableHeaders = memo(({
   onSort 
 }: {
   headers: string[];
-  sortColumn: string;
-  sortOrder: string;
-  onSort: (column: string) => void;
+  sortColumn?: string;
+  sortOrder?: string;
+  onSort?: (column: string) => void;
 }) => (
-  <tr>
+  <TableRow>
     {headers.map((header, index) => (
-      <th 
-        key={index} 
-        style={{ 
-          padding: '12px', 
-          textAlign: 'left', 
-          borderBottom: '1px solid #ddd',
-          whiteSpace: 'nowrap',
-          cursor: 'pointer',
-          position: 'sticky',
-          top: 0,
-          background: 'inherit',
-          fontWeight: 600
+      <TableCell
+        key={index}
+        onClick={() => onSort?.(header)}
+        sx={{ 
+          cursor: onSort ? 'pointer' : 'default',
+          fontWeight: 600,
+          whiteSpace: 'nowrap'
         }}
-        onClick={() => onSort(header)}
       >
-        {header} {sortColumn === header ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-      </th>
+        {header}
+        {sortColumn === header && (
+          <span style={{ marginLeft: '4px' }}>
+            {sortOrder === "asc" ? "↑" : "↓"}
+          </span>
+        )}
+      </TableCell>
     ))}
-  </tr>
+  </TableRow>
 ));
 
 TableHeaders.displayName = 'TableHeaders';
@@ -72,33 +77,26 @@ const TableRows = memo(({
 }) => (
   <>
     {rows.length === 0 ? (
-      <tr>
-        <td 
+      <TableRow>
+        <TableCell 
           colSpan={headers.length}
-          style={{ 
-            padding: '16px', 
-            textAlign: 'center' 
-          }}
+          align="center"
         >
           No results found
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     ) : (
       rows.map((row, rowIndex) => (
-        <tr key={rowIndex}>
+        <TableRow key={rowIndex}>
           {row.map((cell, cellIndex) => (
-            <td 
-              key={cellIndex} 
-              style={{ 
-                padding: '8px 12px', 
-                borderBottom: '1px solid #ddd',
-                whiteSpace: 'nowrap'
-              }}
+            <TableCell 
+              key={cellIndex}
+              sx={{ whiteSpace: 'nowrap' }}
             >
               {cell}
-            </td>
+            </TableCell>
           ))}
-        </tr>
+        </TableRow>
       ))
     )}
   </>
@@ -198,10 +196,19 @@ const QueryResultTable = memo(({
   onFilterOperatorChange,
   onFilterValueChange
 }: QueryResultTableProps) => {
-  // Memoized handler for sorting
-  const handleSort = useCallback((column: string) => {
-    onSort(column);
-  }, [onSort]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Box 
@@ -227,27 +234,36 @@ const QueryResultTable = memo(({
         onFilter={onFilter}
       />
 
-      <Box 
+      <TableContainer 
         sx={{ 
-          overflowX: 'auto',
           maxHeight: '50vh',
-          overflowY: 'auto'
+          overflow: 'auto'
         }}
       >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
+        <Table stickyHeader>
+          <TableHead>
             <TableHeaders 
               headers={headers} 
               sortColumn={sortColumn} 
               sortOrder={sortOrder} 
-              onSort={handleSort}
+              onSort={onSort}
             />
-          </thead>
-          <tbody>
-            <TableRows rows={rows} headers={headers} />
-          </tbody>
-        </table>
-      </Box>
+          </TableHead>
+          <TableBody>
+            <TableRows rows={paginatedRows} headers={headers} />
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={rows.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+      />
     </Box>
   );
 });

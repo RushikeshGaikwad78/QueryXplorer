@@ -19,7 +19,6 @@ const QueryEditor: React.FC<QueryEditorProps> = ({ value, onChange, disabled = f
       disabled={disabled}
       sx={{ 
         mb: 2,
-        width: '100%',
         '& .MuiInputBase-root': {
           fontFamily: 'monospace',
           backgroundColor: 'background.paper',

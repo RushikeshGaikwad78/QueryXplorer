@@ -1,11 +1,13 @@
 import './App.css'
 import { useState, Suspense, useMemo , useCallback } from 'react'  
-import { AppBar,Toolbar,IconButton,Typography,Drawer,Box,useMediaQuery, Paper, Container, Button } from '@mui/material'
+import { AppBar,Toolbar,IconButton,Typography,Drawer,Box,useMediaQuery, Paper, Container, Button, ThemeProvider, createTheme , CssBaseline} from '@mui/material'
 import {
   Menu as MenuIcon,
   History as HistoryIcon,
   ContentCopy as ContentCopyIcon,
-  PlayArrow as PlayArrowIcon
+  PlayArrow as PlayArrowIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon
 } from '@mui/icons-material'
 
 import { QueryHistoryItem, QueryState} from './types'
@@ -37,6 +39,18 @@ function App() {
   const [sortColumn, setSortColumn] = useState("")
   const [sortOrder, setSortOrder] = useState("asc")
 
+  const theme = useMemo(() => createTheme({
+    palette: {
+      mode: state.theme,
+      primary: {
+        main: '#646cff',
+      },
+      secondary: {
+        main: '#535bf2',
+      },
+    },
+  }), [state.theme]);
+
   const toggleDatabase = useCallback((dbName: string) => {
     setState(prev => ({
       ...prev,
@@ -57,7 +71,12 @@ function App() {
       activeTable: tableName
     }))
   }, []);
-
+  const toggleTheme = () => {
+      setState(prev => ({
+        ...prev,
+        theme: prev.theme === 'light' ? 'dark' : 'light'
+      }))
+    }
   const drawerWidth = {
     left: 250,
     right: 300
@@ -233,7 +252,9 @@ function App() {
 
 
   return (
-    <>
+    
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar>
             <IconButton
@@ -255,8 +276,12 @@ function App() {
               >
                 <HistoryIcon />
               </IconButton>
+              <IconButton color="inherit" onClick={toggleTheme}>
+              {state.theme === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
           </Toolbar>
         </AppBar>
+
         {/* Left Drawer */}
         <Drawer
           variant="temporary"
@@ -301,24 +326,18 @@ function App() {
           sx={{
             flexGrow: 1,
             p: 3,
-            // width: { md: `calc(100% - ${drawerWidth.left + drawerWidth.right}px)` },
-            marginLeft: '-40px',
+            width: '100%',
             marginTop: '64px',
-            minHeight: 'calc(100vh - 64px)',
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
+            
           }}
         >
           <Container 
-            maxWidth={false}
-            disableGutters
             sx={{ 
               height: '100%',
+
+              mx: 'auto',
+              px: { xs: 1, sm: 2, md: 4 },
               width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              px: { xs: 1, sm: 2, md: 3 },
             }}
           >
             <Paper sx={{ 
@@ -326,7 +345,7 @@ function App() {
               mb: 3, 
               backgroundColor: 'background.paper',
               minHeight: '200px',
-              width: '100%'
+              width: '100%',
             }}>
               <Typography variant="h6" gutterBottom>
                 SQL Query Editor
@@ -362,6 +381,7 @@ function App() {
                   Run Query
                 </Button>
               </Box>
+              
             </Paper>
 
             {state.tableData && (
@@ -429,7 +449,8 @@ function App() {
           {rightDrawerContent}
         </Drawer>
 
-    </>
+    
+    </ThemeProvider>
   )
 }
 

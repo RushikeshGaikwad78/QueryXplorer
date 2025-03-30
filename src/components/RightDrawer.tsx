@@ -28,8 +28,8 @@ const RightDrawer: React.FC<RightDrawerProps> = ({
   const QueryResultDialog = React.lazy(() => import('./QueryResultDialog'));
 
   return (
-    <Box sx={{ width: 300 }}>
-      <Typography variant="h6" sx={{ p: 2 }}>Query History</Typography>
+    <Box sx={{ width: 270 }}>
+      <Typography variant="h6" sx={{ p: 1 }}>Query History</Typography>
       <Divider />
       <List sx={{ maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
         {queryHistory.length === 0 ? (

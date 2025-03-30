@@ -31,7 +31,7 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
 }) => {
   return (
     <Box sx={{ width: 250 }}>
-      <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold' }}>
+      <Typography variant="h6" sx={{ p: 1, fontWeight: 'bold' }}>
         Databases & Tables
       </Typography>
       <Divider />
@@ -50,7 +50,7 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
               {expandedDB[dbName] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </ListItem>
             <Collapse in={expandedDB[dbName]} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding sx={{ pl: 2 }}>
+              <List component="div" disablePadding sx={{ pl: 1 }}>
                 {Object.keys(databases[dbName]).map((tableName) => (
                   <Box key={tableName}>
                     <ListItem component="div" onClick={() => toggleTable(dbName, tableName)} sx={{ pl: 2 }}>
@@ -64,9 +64,9 @@ const LeftDrawer: React.FC<LeftDrawerProps> = ({
                       {expandedTables[`${dbName}-${tableName}`] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse in={expandedTables[`${dbName}-${tableName}`]} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding sx={{ pl: 4 }}>
+                      <List component="div" disablePadding sx={{ pl: 2 }}>
                         {databases[dbName][tableName].map((col, index) => (
-                          <ListItem key={index} sx={{ pl: 2 }}>
+                          <ListItem key={index} sx={{ pl: 1 }}>
                             <ListItemText
                               primary={`${col.column} - ${col.type}`}
                               primaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}

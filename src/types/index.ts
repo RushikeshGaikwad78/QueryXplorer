@@ -25,9 +25,11 @@ export interface Column {
   export interface Query {
     id: string;
     name: string;
-    query: string;
-    result: QueryResult;
+    sql: string;
+    description: string;
+    table?: string;
   }
+  
   
   export interface QueryState {
     query: string;

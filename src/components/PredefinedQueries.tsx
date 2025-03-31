@@ -21,7 +21,7 @@ interface PredefinedQueriesProps {
 }
 
 const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQuerySelect }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   const handleClick = () => {
     setOpen(!open);
@@ -35,16 +35,24 @@ const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQueryS
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          p: 1,
-          cursor: 'pointer',  // Ensure the entire header is clickable
+          p: 1.5,
+          cursor: 'pointer',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
         onClick={handleClick}
         role="button"
         aria-label="Toggle Test Queries"
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <QueryStatsIcon />
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <QueryStatsIcon color="primary" />
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 'bold',
+              color: 'text.primary'
+            }}
+          >
             Test Queries
           </Typography>
         </Box>
@@ -53,25 +61,38 @@ const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQueryS
         <ExpandMoreIcon 
           sx={{ 
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)', 
-            transition: '0.3s' 
+            transition: '0.3s',
+            color: 'primary.main'
           }} 
         />
       </Box>
 
       {/* Collapsible Query List */}
-      <Collapse in={open}>
+      <Collapse in={open} timeout="auto">
         <List disablePadding>
           {queries.map((query) => (
             <ListItem key={query.id} disablePadding>
               <ListItemButton
                 onClick={() => onQuerySelect(query)}
-                sx={{ pl: 4 }}
+                sx={{ 
+                  pl: 4,
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  }
+                }}
               >
                 <ListItemText
                   primary={query.name}
                   secondary={query.description}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                  secondaryTypographyProps={{ variant: 'caption' }}
+                  primaryTypographyProps={{ 
+                    variant: 'body2',
+                    fontWeight: 'medium',
+                    color: 'text.primary'
+                  }}
+                  secondaryTypographyProps={{ 
+                    variant: 'caption',
+                    color: 'text.secondary'
+                  }}
                 />
               </ListItemButton>
             </ListItem>
@@ -79,7 +100,7 @@ const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQueryS
         </List>
       </Collapse>
 
-      <Divider />
+      <Divider sx={{ my: 1 }} />
     </Box>
   );
 };

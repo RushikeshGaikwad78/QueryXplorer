@@ -326,10 +326,33 @@ function App() {
           '& .MuiDrawer-paper': {
             width: DRAWER_WIDTH.left,
             boxSizing: 'border-box',
+            top: '64px',
+            height: 'calc(100% - 64px)',
+            position: 'fixed',
+            left: 0,
+            border: 'none',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
           },
         }}
       >
-        <Box sx={{ pt: 2 }}>
+        <Box sx={{ 
+          pt: 2,
+          height: '100%',
+          overflow: 'auto',
+          backgroundColor: 'background.paper',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: theme.palette.mode === 'dark' ? '#666' : '#ccc',
+            borderRadius: '4px',
+          },
+        }}>
           <PredefinedQueries 
             queries={predefinedQueries} 
             onQuerySelect={handlePredefinedQuerySelect}
@@ -354,11 +377,27 @@ function App() {
             left: 0,
             border: 'none',
             borderRight: '1px solid',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
           },
         }}
       >
-        <Box sx={{ pt: 2 }}>
+        <Box sx={{ 
+          pt: 2,
+          height: '100%',
+          overflow: 'auto',
+          backgroundColor: 'background.paper',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: theme.palette.mode === 'dark' ? '#666' : '#ccc',
+            borderRadius: '4px',
+          },
+        }}>
           <PredefinedQueries 
             queries={predefinedQueries} 
             onQuerySelect={handlePredefinedQuerySelect}

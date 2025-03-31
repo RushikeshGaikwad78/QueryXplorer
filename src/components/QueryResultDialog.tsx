@@ -21,7 +21,7 @@ interface QueryResultDialogProps {
 
 const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, queryResult }) => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);

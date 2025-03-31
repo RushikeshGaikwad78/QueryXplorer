@@ -2,6 +2,13 @@
 
 QueryXplorer is a modern, responsive web application for exploring and executing SQL-like queries on CSV data. Built with React and Material-UI, it provides a user-friendly interface for data analysis and query management.
 
+## LINK to the Deployed Application :-  [QueryXplorer](https://query-xplorer.vercel.app/)
+
+
+## 🎥 Demo Video
+
+Watch the demo video here: [QueryXplorer Demo](https://www.youtube.com/watch?v=xbGpIK62Fv0&ab_channel=RushiGaikwad)
+
 ## ✨ Features
 
 - **📝 Query Management**
@@ -82,6 +89,11 @@ QueryXplorer is a modern, responsive web application for exploring and executing
   - Consistent color palette with primary/secondary colors
   - Dynamic theme switching without page reload
 
+## 💡 Key Achievements
+- **Performance**: Optimized for handling large datasets through chunked loading and virtualization
+- **Usability**: Intuitive interface that makes complex data operations accessible
+- **Flexibility**: Support for custom queries and predefined templates
+- **Scalability**: Modular architecture that can be extended with new features
 
 ## 🛠️ Tech Stack
 
@@ -137,27 +149,13 @@ src/
 ├── utils/            # Utility functions
 └── App.tsx           # Main application component
 ```
-
-## 📖 Usage
-
-1. **✍️ Query Editor**
-   - Enter your SQL-like query in the editor
-   - Use the "Run Query" button to execute
-   - Paste queries from clipboard using the paste button
-
-2. **🔍 Database Explorer**
-   - Browse available databases and tables
-   - Click to expand/collapse sections
-   - View column information for each table
-   - Helps in implementing SQL queries
-
-3. **📜 Query History**
-   - Access previously executed queries
-   - Click on history items to view its results
-   - View query results in a modal dialog
-
-4. **📊 Results Table**
-   - Filter data using the filter controls
-   - Resize columns for better visibility
-   - Helps user to filter rows without explicitly writing sql query
-
+### 🎓 Learning Outcomes
+- Modern React patterns and best practices
+- Performance optimization techniques
+- TypeScript for type safety
+- Material-UI component system
+- CodeMirror integration
+- Efficient data processing strategies
+  
+## 🎯 Conclusion
+QueryXplorer demonstrates how modern web technologies can be leveraged to create powerful data exploration tools. By combining efficient data processing with an intuitive user interface, it provides a seamless experience for working with CSV data through SQL-like queries.

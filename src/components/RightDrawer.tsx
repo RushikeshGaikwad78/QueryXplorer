@@ -29,53 +29,58 @@ const RightDrawer = memo(({
 }: RightDrawerProps) => {
   return (
     <Box sx={{ width: 270 }}>
-      <Typography variant="h6" sx={{ p: 1 }}>Query History</Typography>
-      <Divider />
-      <List sx={{ maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
-        {queryHistory.length === 0 ? (
-          <ListItem>
-            <ListItemText 
-              primary="No queries yet"
-              secondary="Run a query to see it here"
-            />
-          </ListItem>
-        ) : (
-          queryHistory.map((item) => (
-            <ListItem 
-              key={item.id} 
-              component="div"
-              onClick={() => onQueryClick(item.query)}
-              sx={{
-                cursor: 'pointer',
-                '&:hover': { backgroundColor: 'action.hover' },
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                py: 1
-              }}
+    <Typography variant="h6" sx={{ p: 1 }}>Query History</Typography>
+    <Divider />
+    
+    <Box sx={{ maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
+      {queryHistory.length === 0 ? (
+        <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+          <Typography variant="body2">No queries yet</Typography>
+          <Typography variant="caption">Run a query to see it here</Typography>
+        </Box>
+      ) : (
+        queryHistory.map((item) => (
+          <Box 
+            key={item.id}
+            onClick={() => onQueryClick(item.query)}
+            sx={{
+              cursor: 'pointer',
+              p: 1,
+              '&:hover': { backgroundColor: 'action.hover' },
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            role="button"
+            tabIndex={0} // Makes it keyboard accessible
+          >
+            <Typography 
+              variant="body2" 
+              sx={{ fontFamily: 'monospace' }}
             >
-              <ListItemText 
-                primary={item.query}
-                secondary={item.timestamp}
-                primaryTypographyProps={{ 
-                  noWrap: true, 
-                  sx: { fontSize: '0.875rem', fontFamily: 'monospace' } 
-                }}
-              />
-            </ListItem>
-          ))
-        )}
-      </List>
-
-      {openDialog && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <QueryResultDialog
-            open={openDialog}
-            onClose={onCloseDialog}
-            queryResult={selectedQueryResult}
-          />
-        </Suspense>
+              {item.query}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {item.timestamp}
+            </Typography>
+          </Box>
+        ))
       )}
     </Box>
+  
+    {openDialog && (
+      <Suspense fallback={<div>Loading...</div>}>
+        <QueryResultDialog
+          open={openDialog}
+          onClose={onCloseDialog}
+          queryResult={selectedQueryResult}
+        />
+      </Suspense>
+    )}
+  </Box>
+  
   );
 });
 

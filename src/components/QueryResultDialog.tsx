@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -11,6 +11,7 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import Paper from '@mui/material/Paper';
+import TablePagination from '@mui/material/TablePagination';
 
 interface QueryResultDialogProps {
   open: boolean;
@@ -19,6 +20,68 @@ interface QueryResultDialogProps {
 }
 
 const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, queryResult }) => {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const tableHead = useMemo(() => (
+    <TableHead>
+      <TableRow>
+        {queryResult?.headers.map((header, index) => (
+          <TableCell 
+            key={index}
+            sx={{
+              backgroundColor: 'primary.main',
+              color: 'white',
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {header}
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  ), [queryResult?.headers]);
+
+  const tableBody = useMemo(() => (
+    <TableBody>
+      {queryResult?.rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, rowIndex) => (
+        <TableRow 
+          key={rowIndex}
+          hover
+          sx={{
+            '&:nth-of-type(odd)': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+        >
+          {row.map((cell, cellIndex) => (
+            <TableCell 
+              key={cellIndex}
+              sx={{
+                whiteSpace: 'nowrap',
+                maxWidth: '300px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {cell}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </TableBody>
+  ), [queryResult?.rows, page, rowsPerPage]);
+
   return (
     <Dialog
       open={open}
@@ -58,77 +121,31 @@ const QueryResultDialog: React.FC<QueryResultDialogProps> = ({ open, onClose, qu
           <CloseIcon />
         </IconButton>
       </DialogTitle>
+      <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={queryResult?.rows.length || 0}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       <DialogContent dividers sx={{ p: 0 }}>
         {queryResult && (
           <TableContainer 
             component={Paper} 
             sx={{ 
-              height: 'calc(95vh - 64px)', 
-              overflow: 'auto',
-              '&::-webkit-scrollbar': {
-                width: '8px',
-                height: '8px'
-              },
-              '&::-webkit-scrollbar-track': {
-                background: '#f1f1f1'
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#888',
-                borderRadius: '4px'
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                background: '#555'
-              }
+              height: 'calc(95vh - 112px)', 
+              overflow: 'auto'
             }}
           >
             <Table stickyHeader size="medium">
-              <TableHead>
-                <TableRow>
-                  {queryResult.headers.map((header, index) => (
-                    <TableCell 
-                      key={index}
-                      sx={{
-                        backgroundColor: 'primary.main',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {queryResult.rows.map((row, rowIndex) => (
-                  <TableRow 
-                    key={rowIndex}
-                    hover
-                    sx={{
-                      '&:nth-of-type(odd)': {
-                        backgroundColor: 'action.hover'
-                      }
-                    }}
-                  >
-                    {row.map((cell, cellIndex) => (
-                      <TableCell 
-                        key={cellIndex}
-                        sx={{
-                          whiteSpace: 'nowrap',
-                          maxWidth: '300px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {cell}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
+              {tableHead}
+              {tableBody}
             </Table>
           </TableContainer>
         )}
+        
       </DialogContent>
     </Dialog>
   );

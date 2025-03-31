@@ -82,7 +82,7 @@ export const loadCSV = async (tableName: string): Promise<TableData> => {
 
     return parsedData;
   } catch (error) {
-    console.error(`Error loading CSV for ${tableName}:`, error);
+    // console.error(`Error loading CSV for ${tableName}:`, error);
     throw error;
   }
 };
@@ -107,7 +107,7 @@ export const getCacheStats = () => {
 };
 
 // Function to execute a simple query on cached data
-const VALID_TABLES = new Set(['categories', 'customers', 'employees', 'orders', 'products', 'suppliers', 'shippers']); // Example valid tables
+const VALID_TABLES = new Set(['categories', 'customers', 'employees', 'orders', 'products', 'suppliers', 'shippers', 'order_details']); 
 
 export const executeQuery = async (query: string): Promise<TableData> => {
   // Extract table name

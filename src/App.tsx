@@ -106,7 +106,7 @@ function App() {
       setSelectedQueryResult(result);
       setOpenDialog(true);
     } catch (error) {
-      console.error('Error executing query:', error);
+      // console.error('Error executing query:', error);
       setSelectedQueryResult({
         headers: ['Error'],
         rows: [[error instanceof Error ? error.message : 'Failed to execute query']]
@@ -196,7 +196,7 @@ function App() {
       const text = await navigator.clipboard.readText()
       setState(prev => ({ ...prev, query: text }))
     } catch (err) {
-      console.error('Failed to read clipboard:', err)
+      // console.error('Failed to read clipboard:', err)
     }
   }, [])
 
@@ -226,7 +226,7 @@ function App() {
         });
       })
       .catch(error => {
-        console.error('Error executing query:', error);
+        // console.error('Error executing query:', error);
         setState(prev => {
           const filteredHistory = prev.queryHistory.filter(
             (item) => item.query !== state.query
@@ -292,8 +292,8 @@ function App() {
         >
           <MenuIcon />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          SQL Query Interface
+        <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
+          QueryXplorer
         </Typography>
         <IconButton
           color="inherit"
@@ -308,8 +308,7 @@ function App() {
         </IconButton>
       </Toolbar>
     </AppBar>
-  ), [mobileLeftOpen, mobileRightOpen, toggleTheme])
-
+  ), [mobileLeftOpen, mobileRightOpen, toggleTheme]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

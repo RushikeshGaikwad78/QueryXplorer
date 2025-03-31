@@ -102,13 +102,6 @@ function App() {
   const handleQueryClick = useCallback(async (query: string) => {
     // Simplified dummy result for testing
     try {
-      // Extract table name from query
-      const tableMatch = query.toLowerCase().match(/from\s+(\w+)/i);
-      if (!tableMatch) {
-        throw new Error('No table specified in query');
-      }
-
-      const tableName = tableMatch[1];
       const result = await executeQuery(query);
       setSelectedQueryResult(result);
       setOpenDialog(true);

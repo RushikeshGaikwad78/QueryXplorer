@@ -35,9 +35,9 @@ const LeftDrawer = memo(({
       <Divider />
       <List>
         {Object.keys(databases).map((dbName) => (
-          <Box key={dbName}>
+          <React.Fragment key={dbName}>
             <ListItem 
-            component="div" 
+              disablePadding
               onClick={() => toggleDatabase(dbName)}
               sx={{ cursor: 'pointer' }}
             >
@@ -52,12 +52,12 @@ const LeftDrawer = memo(({
               {expandedDB[dbName] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </ListItem>
             <Collapse in={expandedDB[dbName]} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding sx={{ pl: 1 }}>
+              <List disablePadding sx={{ pl: 1 }}>
                 {Object.keys(databases[dbName]).map((tableName) => (
-                  <Box key={tableName}>
+                  <React.Fragment key={tableName}>
                     <ListItem 
-                      component="div" 
-                      onClick={() => toggleTable(dbName, tableName)} 
+                      disablePadding
+                      onClick={() => toggleTable(dbName, tableName)}
                       sx={{ pl: 2, cursor: 'pointer' }}
                     >
                       <ListItemText
@@ -69,10 +69,17 @@ const LeftDrawer = memo(({
                       />
                       {expandedTables[`${dbName}-${tableName}`] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
-                    <Collapse in={expandedTables[`${dbName}-${tableName}`]} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding sx={{ pl: 2 }}>
+                    <Collapse 
+                      in={expandedTables[`${dbName}-${tableName}`]} 
+                      timeout="auto" 
+                      unmountOnExit
+                    >
+                      <List disablePadding sx={{ pl: 2 }}>
                         {databases[dbName][tableName].map((col, index) => (
-                          <ListItem key={index} sx={{ pl: 1 }}>
+                          <ListItem 
+                            key={index} 
+                            sx={{ pl: 1 }}
+                          >
                             <ListItemText
                               primary={`${col.column} - ${col.type}`}
                               primaryTypographyProps={{ fontSize: '0.8rem', color: 'text.secondary' }}
@@ -81,11 +88,11 @@ const LeftDrawer = memo(({
                         ))}
                       </List>
                     </Collapse>
-                  </Box>
+                  </React.Fragment>
                 ))}
               </List>
             </Collapse>
-          </Box>
+          </React.Fragment>
         ))}
       </List>
     </Box>

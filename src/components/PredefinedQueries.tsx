@@ -21,7 +21,7 @@ interface PredefinedQueriesProps {
 }
 
 const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQuerySelect }) => {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
     setOpen(!open);
@@ -29,33 +29,33 @@ const PredefinedQueries: React.FC<PredefinedQueriesProps> = ({ queries, onQueryS
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* Header with Clickable Icon */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1 }}>
+      {/* Header with Clickable Area */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          p: 1,
+          cursor: 'pointer',  // Ensure the entire header is clickable
+        }}
+        onClick={handleClick}
+        role="button"
+        aria-label="Toggle Test Queries"
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <QueryStatsIcon />
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
             Test Queries
           </Typography>
         </Box>
-        
-        {/* Clickable ExpandMore Icon */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer',
-          }}
-          onClick={handleClick}
-          role="button"
-          aria-label="Toggle Test Queries"
-        >
-          <ExpandMoreIcon 
-            sx={{ 
-              transform: open ? 'rotate(180deg)' : 'rotate(0deg)', 
-              transition: '0.3s' 
-            }} 
-          />
-        </Box>
+
+        {/* Clickable Expand Icon */}
+        <ExpandMoreIcon 
+          sx={{ 
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)', 
+            transition: '0.3s' 
+          }} 
+        />
       </Box>
 
       {/* Collapsible Query List */}

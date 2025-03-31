@@ -107,6 +107,8 @@ export const getCacheStats = () => {
 };
 
 // Function to execute a simple query on cached data
+const VALID_TABLES = new Set(['categories', 'customers', 'employees', 'orders', 'products', 'suppliers', 'shippers']); // Example valid tables
+
 export const executeQuery = async (query: string): Promise<TableData> => {
   // Extract table name
   const tableMatch = query.toLowerCase().match(/from\s+(\w+)/i);
@@ -115,6 +117,12 @@ export const executeQuery = async (query: string): Promise<TableData> => {
   }
 
   const tableName = tableMatch[1];
+
+  // Check if table name is valid
+  if (!VALID_TABLES.has(tableName)) {
+    throw new Error(`Invalid table name: "${tableName}"`);
+  }
+
   const data = await loadCSV(tableName);
 
   // Handle SELECT clause
@@ -130,4 +138,4 @@ export const executeQuery = async (query: string): Promise<TableData> => {
     headers: selectedColumns,
     rows: mappedRows
   };
-}; 
+};

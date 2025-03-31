@@ -233,7 +233,15 @@ const QueryResultTable = memo(({
         onFilterValueChange={onFilterValueChange}
         onFilter={onFilter}
       />
-
+  <TablePagination
+        component="div"
+        count={rows.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+      />
       <TableContainer 
         sx={{ 
           maxHeight: '50vh',
@@ -255,15 +263,7 @@ const QueryResultTable = memo(({
         </Table>
       </TableContainer>
 
-      <TablePagination
-        component="div"
-        count={rows.length}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-      />
+      
     </Box>
   );
 });

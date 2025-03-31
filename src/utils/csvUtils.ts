@@ -119,71 +119,10 @@ export const executeQuery = async (query: string): Promise<TableData> => {
 
   // Handle SELECT clause
   let selectedColumns = data.headers;
-  const selectMatch = query.toLowerCase().match(/select\s+(.+?)\s+from/i);
-  if (selectMatch) {
-    const columnsStr = selectMatch[1].trim();
-    if (columnsStr !== '*') {
-      selectedColumns = columnsStr.split(',').map(col => col.trim());
-      // Validate columns exist
-      selectedColumns.forEach(col => {
-        if (!data.headers.includes(col)) {
-          throw new Error(`Column ${col} not found`);
-        }
-      });
-    }
-  }
-
-  // Handle WHERE clause
-  let filteredRows = data.rows;
-  const whereMatch = query.toLowerCase().match(/where\s+(.+?)(?:\s+limit\s+\d+)?$/i);
-  if (whereMatch) {
-    const conditions = whereMatch[1].split(/\s+and\s+/i);
-    filteredRows = data.rows.filter(row => {
-      return conditions.every(condition => {
-        const [column, operator, value] = condition.split(/\s+/);
-        const columnIndex = data.headers.indexOf(column);
-
-        if (columnIndex === -1) {
-          throw new Error(`Column ${column} not found`);
-        }
-
-        const cellValue = row[columnIndex];
-        switch (operator.toLowerCase()) {
-          case '=':
-            return cellValue === value;
-          case '>':
-            return parseFloat(cellValue) > parseFloat(value);
-          case '<':
-            return parseFloat(cellValue) < parseFloat(value);
-          case '>=':
-            return parseFloat(cellValue) >= parseFloat(value);
-          case '<=':
-            return parseFloat(cellValue) <= parseFloat(value);
-          case '!=':
-            return cellValue !== value;
-          case 'like':
-            const pattern = value.replace(/%/g, '.*').replace(/_/g, '.');
-            return new RegExp(`^${pattern}$`, 'i').test(cellValue);
-          case 'in':
-            const values = value.replace(/[()]/g, '').split(',').map(v => v.trim());
-            return values.includes(cellValue);
-          default:
-            return true;
-        }
-      });
-    });
-  }
-
-  // Handle LIMIT clause
-  const limitMatch = query.toLowerCase().match(/limit\s+(\d+)/i);
-  if (limitMatch) {
-    const limit = parseInt(limitMatch[1]);
-    filteredRows = filteredRows.slice(0, limit);
-  }
-
+  
   // Map selected columns
   const columnIndices = selectedColumns.map(col => data.headers.indexOf(col));
-  const mappedRows = filteredRows.map(row => 
+  const mappedRows = data.rows.map(row => 
     columnIndices.map(index => row[index])
   );
 
